@@ -24,11 +24,11 @@ public:
     ~MainWindow();
 
 private slots:
-    void readBatteryData();
+    void readEnergyData();
     void updateServo(QString command);
     void readSerial();
     void processRadarData(const QString &data);
-    void processBatteryData(const QString &data);
+    void processEnergyData(const QString &data);
     void updateHistoricalData();
     void on_button0_clicked();
     void on_button45_clicked();
@@ -51,9 +51,9 @@ private slots:
 private:
     Ui::MainWindow *ui;
     QSerialPort *serial;
-    QSerialPort *batterySerial;
-    QTimer *batteryTimer;
-    QByteArray batteryDataBuffer;
+    QSerialPort *energySerial;
+    QTimer *energyTimer;
+    QByteArray energyDataBuffer;
     QString serialBuffer;
     QStringList historicalData;
     QTimer *dataUpdateTimer;
@@ -84,7 +84,8 @@ private:
     bool previousAutoMode;
     bool previousSliderState;
     const float MAX_DETECTION_RANGE = 200.0;
-    const float LASER_ACTIVATION_RANGE = 50.0;
+    const float LASER_ACTIVATION_MIN_RANGE = 1.0;
+    const float LASER_ACTIVATION_MAX_RANGE = 50.0;
 
 };
 

@@ -41,14 +41,14 @@ namespace {
 struct qt_meta_stringdata_CLASSMainWindowENDCLASS_t {};
 constexpr auto qt_meta_stringdata_CLASSMainWindowENDCLASS = QtMocHelpers::stringData(
     "MainWindow",
-    "readBatteryData",
+    "readEnergyData",
     "",
     "updateServo",
     "command",
     "readSerial",
     "processRadarData",
     "data",
-    "processBatteryData",
+    "processEnergyData",
     "updateHistoricalData",
     "on_button0_clicked",
     "on_button45_clicked",
@@ -77,14 +77,14 @@ constexpr auto qt_meta_stringdata_CLASSMainWindowENDCLASS = QtMocHelpers::string
 struct qt_meta_stringdata_CLASSMainWindowENDCLASS_t {
     uint offsetsAndSizes[64];
     char stringdata0[11];
-    char stringdata1[16];
+    char stringdata1[15];
     char stringdata2[1];
     char stringdata3[12];
     char stringdata4[8];
     char stringdata5[11];
     char stringdata6[17];
     char stringdata7[5];
-    char stringdata8[19];
+    char stringdata8[18];
     char stringdata9[21];
     char stringdata10[19];
     char stringdata11[20];
@@ -114,47 +114,47 @@ struct qt_meta_stringdata_CLASSMainWindowENDCLASS_t {
 Q_CONSTINIT static const qt_meta_stringdata_CLASSMainWindowENDCLASS_t qt_meta_stringdata_CLASSMainWindowENDCLASS = {
     {
         QT_MOC_LITERAL(0, 10),  // "MainWindow"
-        QT_MOC_LITERAL(11, 15),  // "readBatteryData"
-        QT_MOC_LITERAL(27, 0),  // ""
-        QT_MOC_LITERAL(28, 11),  // "updateServo"
-        QT_MOC_LITERAL(40, 7),  // "command"
-        QT_MOC_LITERAL(48, 10),  // "readSerial"
-        QT_MOC_LITERAL(59, 16),  // "processRadarData"
-        QT_MOC_LITERAL(76, 4),  // "data"
-        QT_MOC_LITERAL(81, 18),  // "processBatteryData"
-        QT_MOC_LITERAL(100, 20),  // "updateHistoricalData"
-        QT_MOC_LITERAL(121, 18),  // "on_button0_clicked"
-        QT_MOC_LITERAL(140, 19),  // "on_button45_clicked"
-        QT_MOC_LITERAL(160, 19),  // "on_button90_clicked"
-        QT_MOC_LITERAL(180, 20),  // "on_button135_clicked"
-        QT_MOC_LITERAL(201, 20),  // "on_button180_clicked"
-        QT_MOC_LITERAL(222, 30),  // "on_verticalSlider_valueChanged"
-        QT_MOC_LITERAL(253, 5),  // "value"
-        QT_MOC_LITERAL(259, 22),  // "on_button_auto_clicked"
-        QT_MOC_LITERAL(282, 15),  // "updateServoAuto"
-        QT_MOC_LITERAL(298, 23),  // "clearOldDetectionPoints"
-        QT_MOC_LITERAL(322, 20),  // "updateDetectionPoint"
-        QT_MOC_LITERAL(343, 5),  // "angle"
-        QT_MOC_LITERAL(349, 8),  // "distance"
-        QT_MOC_LITERAL(358, 21),  // "handleLaserActivation"
-        QT_MOC_LITERAL(380, 15),  // "deactivateLaser"
-        QT_MOC_LITERAL(396, 15),  // "resumeOperation"
-        QT_MOC_LITERAL(412, 17),  // "updateLaserStatus"
-        QT_MOC_LITERAL(430, 6),  // "status"
-        QT_MOC_LITERAL(437, 16),  // "setSliderEnabled"
-        QT_MOC_LITERAL(454, 7),  // "enabled"
-        QT_MOC_LITERAL(462, 17),  // "updateCurrentTime"
-        QT_MOC_LITERAL(480, 17)   // "handleLaserStatus"
+        QT_MOC_LITERAL(11, 14),  // "readEnergyData"
+        QT_MOC_LITERAL(26, 0),  // ""
+        QT_MOC_LITERAL(27, 11),  // "updateServo"
+        QT_MOC_LITERAL(39, 7),  // "command"
+        QT_MOC_LITERAL(47, 10),  // "readSerial"
+        QT_MOC_LITERAL(58, 16),  // "processRadarData"
+        QT_MOC_LITERAL(75, 4),  // "data"
+        QT_MOC_LITERAL(80, 17),  // "processEnergyData"
+        QT_MOC_LITERAL(98, 20),  // "updateHistoricalData"
+        QT_MOC_LITERAL(119, 18),  // "on_button0_clicked"
+        QT_MOC_LITERAL(138, 19),  // "on_button45_clicked"
+        QT_MOC_LITERAL(158, 19),  // "on_button90_clicked"
+        QT_MOC_LITERAL(178, 20),  // "on_button135_clicked"
+        QT_MOC_LITERAL(199, 20),  // "on_button180_clicked"
+        QT_MOC_LITERAL(220, 30),  // "on_verticalSlider_valueChanged"
+        QT_MOC_LITERAL(251, 5),  // "value"
+        QT_MOC_LITERAL(257, 22),  // "on_button_auto_clicked"
+        QT_MOC_LITERAL(280, 15),  // "updateServoAuto"
+        QT_MOC_LITERAL(296, 23),  // "clearOldDetectionPoints"
+        QT_MOC_LITERAL(320, 20),  // "updateDetectionPoint"
+        QT_MOC_LITERAL(341, 5),  // "angle"
+        QT_MOC_LITERAL(347, 8),  // "distance"
+        QT_MOC_LITERAL(356, 21),  // "handleLaserActivation"
+        QT_MOC_LITERAL(378, 15),  // "deactivateLaser"
+        QT_MOC_LITERAL(394, 15),  // "resumeOperation"
+        QT_MOC_LITERAL(410, 17),  // "updateLaserStatus"
+        QT_MOC_LITERAL(428, 6),  // "status"
+        QT_MOC_LITERAL(435, 16),  // "setSliderEnabled"
+        QT_MOC_LITERAL(452, 7),  // "enabled"
+        QT_MOC_LITERAL(460, 17),  // "updateCurrentTime"
+        QT_MOC_LITERAL(478, 17)   // "handleLaserStatus"
     },
     "MainWindow",
-    "readBatteryData",
+    "readEnergyData",
     "",
     "updateServo",
     "command",
     "readSerial",
     "processRadarData",
     "data",
-    "processBatteryData",
+    "processEnergyData",
     "updateHistoricalData",
     "on_button0_clicked",
     "on_button45_clicked",
@@ -258,7 +258,7 @@ Q_CONSTINIT const QMetaObject MainWindow::staticMetaObject = { {
     qt_incomplete_metaTypeArray<qt_meta_stringdata_CLASSMainWindowENDCLASS_t,
         // Q_OBJECT / Q_GADGET
         QtPrivate::TypeAndForceComplete<MainWindow, std::true_type>,
-        // method 'readBatteryData'
+        // method 'readEnergyData'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         // method 'updateServo'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
@@ -268,7 +268,7 @@ Q_CONSTINIT const QMetaObject MainWindow::staticMetaObject = { {
         // method 'processRadarData'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         QtPrivate::TypeAndForceComplete<const QString &, std::false_type>,
-        // method 'processBatteryData'
+        // method 'processEnergyData'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         QtPrivate::TypeAndForceComplete<const QString &, std::false_type>,
         // method 'updateHistoricalData'
@@ -323,11 +323,11 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         auto *_t = static_cast<MainWindow *>(_o);
         (void)_t;
         switch (_id) {
-        case 0: _t->readBatteryData(); break;
+        case 0: _t->readEnergyData(); break;
         case 1: _t->updateServo((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1]))); break;
         case 2: _t->readSerial(); break;
         case 3: _t->processRadarData((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1]))); break;
-        case 4: _t->processBatteryData((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1]))); break;
+        case 4: _t->processEnergyData((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1]))); break;
         case 5: _t->updateHistoricalData(); break;
         case 6: _t->on_button0_clicked(); break;
         case 7: _t->on_button45_clicked(); break;

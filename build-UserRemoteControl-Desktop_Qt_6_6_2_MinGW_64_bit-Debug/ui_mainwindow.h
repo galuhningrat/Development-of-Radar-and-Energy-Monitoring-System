@@ -870,7 +870,7 @@ public:
 
         detectionStatusLabel = new QLabel(centralwidget);
         detectionStatusLabel->setObjectName("detectionStatusLabel");
-        detectionStatusLabel->setGeometry(QRect(100, 510, 251, 61));
+        detectionStatusLabel->setGeometry(QRect(730, 630, 251, 61));
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName("menubar");

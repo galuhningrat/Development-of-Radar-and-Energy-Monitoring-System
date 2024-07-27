@@ -1603,8 +1603,8 @@
    <widget class="QLabel" name="detectionStatusLabel">
     <property name="geometry">
      <rect>
-      <x>100</x>
-      <y>510</y>
+      <x>730</x>
+      <y>630</y>
       <width>251</width>
       <height>61</height>
      </rect>

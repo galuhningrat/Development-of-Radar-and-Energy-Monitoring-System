@@ -4,9 +4,9 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , batterySerial(new QSerialPort(this))
-    , batteryTimer(new QTimer(this))
-    , batteryDataBuffer()
+    , energySerial(new QSerialPort(this))
+    , energyTimer(new QTimer(this))
+    , energyDataBuffer()
     , r(445.0)
     , angleOffset(0.05)
     , laserActive(false)
@@ -71,9 +71,9 @@ MainWindow::MainWindow(QWidget *parent)
     autoTimer = new QTimer(this);
     connect(autoTimer, &QTimer::timeout, this, &MainWindow::updateServoAuto);
 
+    laserActive = false;
     laserTimer = new QTimer(this);
     connect(laserTimer, &QTimer::timeout, this, &MainWindow::deactivateLaser);
-    laserActive = false;
 
     resumeTimer = new QTimer(this);
     connect(resumeTimer, &QTimer::timeout, this, &MainWindow::resumeOperation);
@@ -88,34 +88,35 @@ MainWindow::MainWindow(QWidget *parent)
     connect(timeTimer, &QTimer::timeout, this, &MainWindow::updateCurrentTime);
     timeTimer->start(1000);  // Update every second
 
-    // Setup battery serial port
-    batterySerial->setPortName("COM9");
-    batterySerial->setBaudRate(QSerialPort::Baud115200);
-    batterySerial->setDataBits(QSerialPort::Data8);
-    batterySerial->setParity(QSerialPort::NoParity);
-    batterySerial->setStopBits(QSerialPort::OneStop);
-    batterySerial->setFlowControl(QSerialPort::NoFlowControl);
 
-    if (batterySerial->open(QIODevice::ReadOnly)) {
-        connect(batterySerial, &QSerialPort::readyRead, this, &MainWindow::readBatteryData);
-        qDebug() << "Battery serial port opened successfully.";
+    // Setup energy serial port
+    energySerial->setPortName("COM9");
+    energySerial->setBaudRate(QSerialPort::Baud115200);
+    energySerial->setDataBits(QSerialPort::Data8);
+    energySerial->setParity(QSerialPort::NoParity);
+    energySerial->setStopBits(QSerialPort::OneStop);
+    energySerial->setFlowControl(QSerialPort::NoFlowControl);
+
+    if (energySerial->open(QIODevice::ReadOnly)) {
+        connect(energySerial, &QSerialPort::readyRead, this, &MainWindow::readEnergyData);
+        qDebug() << "Energy serial port opened successfully.";
     } else {
-        qDebug() << "Failed to open battery serial port.";
+        qDebug() << "Failed to open Energy serial port.";
     }
 
-    batteryTimer->start(2000);
+    energyTimer->start(2000);
 }
 
-void MainWindow::readBatteryData() {
-    QByteArray data = batterySerial->readAll();
-    batteryDataBuffer.append(data);
+void MainWindow::readEnergyData() {
+    QByteArray data = energySerial->readAll();
+    energyDataBuffer.append(data);
 
-    while (batteryDataBuffer.contains('\n')) {
-        int lineEnd = batteryDataBuffer.indexOf('\n');
-        QByteArray line = batteryDataBuffer.left(lineEnd);
-        batteryDataBuffer = batteryDataBuffer.mid(lineEnd + 1);
+    while (energyDataBuffer.contains('\n')) {
+        int lineEnd = energyDataBuffer.indexOf('\n');
+        QByteArray line = energyDataBuffer.left(lineEnd);
+        energyDataBuffer = energyDataBuffer.mid(lineEnd + 1);
 
-        processBatteryData(QString::fromUtf8(line));
+        processEnergyData(QString::fromUtf8(line));
     }
 }
 
@@ -129,7 +130,7 @@ void MainWindow::readSerial() {
         serialBuffer = serialBuffer.mid(lineEnd + 1);
 
         if (line.startsWith("B,")) {
-            processBatteryData(line);
+            processEnergyData(line);
         } else if (line.contains(',')) {
             processRadarData(line);
         } else if (line == "LASER_ACTIVATED") {
@@ -137,27 +138,6 @@ void MainWindow::readSerial() {
         } else if (line == "LASER_DEACTIVATED") {
             handleLaserStatus("LASER_DEACTIVATED");
         }
-    }
-}
-
-void MainWindow::handleLaserStatus(const QString &status) {
-    if (status == "LASER_ACTIVATED") {
-        laserActive = true;
-        updateLaserStatus("Laser: On");
-        setSliderEnabled(false);
-        if (autoMode) {
-            autoTimer->stop();
-            autoMode = false;
-        }
-        laserTimer->start(2000);
-    } else if (status == "LASER_DEACTIVATED") {
-        laserActive = false;
-        updateLaserStatus("Laser: Off");
-        setSliderEnabled(true);
-        if (autoMode) {
-            autoTimer->start(50);
-        }
-        laserTimer->stop();
     }
 }
 
@@ -173,13 +153,25 @@ void MainWindow::processRadarData(const QString &data) {
         ui->angleLabel->setText(QString("%1°").arg(angle, 0, 'f', 1));
         ui->rangeLabel->setText(QString("%1 cm").arg(distance, 0, 'f', 1));
 
-        // Update status if object is detected within range
-        if (distance <= MAX_DETECTION_RANGE) {
-            ui->detectionStatusLabel->setText("Object Detected");
+        // Update status based on distance
+        if (distance >= LASER_ACTIVATION_MIN_RANGE && distance <= LASER_ACTIVATION_MAX_RANGE) {
+            ui->detectionStatusLabel->setText("Object Detected (Laser Range)");
             ui->detectionStatusLabel->setStyleSheet("color: red;");
+            if (!laserActive) {
+                handleLaserActivation();
+            }
+        } else if (distance > LASER_ACTIVATION_MAX_RANGE && distance <= MAX_DETECTION_RANGE) {
+            ui->detectionStatusLabel->setText("Object Detected");
+            ui->detectionStatusLabel->setStyleSheet("color: orange;");
+            if (laserActive) {
+                deactivateLaser();
+            }
         } else {
             ui->detectionStatusLabel->setText("No Object");
             ui->detectionStatusLabel->setStyleSheet("color: green;");
+            if (laserActive) {
+                deactivateLaser();
+            }
         }
     }
 }
@@ -189,7 +181,7 @@ void MainWindow::updateCurrentTime() {
     ui->currentTimeLabel_3->setText(currentTime.toString("hh:mm:ss"));
 }
 
-void MainWindow::processBatteryData(const QString &data) {
+void MainWindow::processEnergyData(const QString &data) {
     QStringList parts = data.split(',');
     if (parts.size() == 6) {
         float busVoltage = parts[1].toFloat();
@@ -277,21 +269,15 @@ void MainWindow::setSliderEnabled(bool enabled) {
     }
 }
 
-void MainWindow::handleLaserActivation() {
-    if (!laserActive) {
+void MainWindow::handleLaserStatus(const QString &status) {
+    if (status == "LASER_ACTIVATED") {
         laserActive = true;
-        previousAutoMode = autoMode;
-        previousSliderState = ui->verticalSlider->isEnabled();
-
-        if (autoMode) {
-            autoTimer->stop();
-            autoMode = false;
-        }
-
-        setSliderEnabled(false);
         updateLaserStatus("Laser: On");
-        arduino->write("LASER_ON\n");
         laserTimer->start(2000);
+    } else if (status == "LASER_DEACTIVATED") {
+        laserActive = false;
+        updateLaserStatus("Laser: Off");
+        laserTimer->stop();
     }
 }
 
@@ -300,26 +286,22 @@ void MainWindow::deactivateLaser() {
     updateLaserStatus("Laser: Off");
     arduino->write("LASER_OFF\n");
     laserTimer->stop();
-    resumeTimer->start(0);  // Timer to resume normal operation after 1 second
+    resumeTimer->start(0);  // Timer to resume normal operation immediately
+}
+
+void MainWindow::handleLaserActivation() {
+    laserActive = true;
+    updateLaserStatus("Laser: On");
+    arduino->write("LASER_ON\n");
+    laserTimer->start(2000);
 }
 
 void MainWindow::resumeOperation() {
     resumeTimer->stop();
-
-    if (previousAutoMode) {
-        autoMode = true;
-        autoTimer->start(50);
+    if (autoMode) {
         arduino->write("AUTO\n");
     } else {
         arduino->write("MANUAL\n");
-    }
-
-    setSliderEnabled(previousSliderState);
-
-    if (autoMode) {
-        ui->button_auto->setText("Stop Auto");
-    } else {
-        ui->button_auto->setText("Start Auto");
     }
 }
 
@@ -359,18 +341,23 @@ void MainWindow::updateServoAuto() {
 }
 
 void MainWindow::updateDetectionPoint(float angle, float distance) {
+    if (distance > 0 && distance <= 200) {
+        float radAngle = qDegreesToRadians(angle);
+
+        // Scale the distance to fit within the radar display
+        float scaledDistance = (distance / 200.0) * 445.0; // 445 is the radius of our radar display
+
+        float x = scaledDistance * qCos(radAngle);
+        float y = scaledDistance * qSin(radAngle);
+
+        QGraphicsRectItem* point = scene->addRect(505 + x, 495 - y, 3, 3, QPen(Qt::red), QBrush(Qt::red));
+        detectionPoints.append(point);
+
+        clearOldDetectionPoints();
+    }
+
+    // Update needle position (always update, even if no object detected)
     float radAngle = qDegreesToRadians(angle);
-
-    // Scale the distance to fit within the radar display
-    float scaledDistance = (distance / MAX_DETECTION_RANGE) * 445.0; // 445 is the radius of our radar display
-
-    float x = scaledDistance * qCos(radAngle);
-    float y = scaledDistance * qSin(radAngle);
-
-    QGraphicsRectItem* point = scene->addRect(505 + x, 495 - y, 3, 3, QPen(Qt::red), QBrush(Qt::red));
-    detectionPoints.append(point);
-
-    // Update needle position
     float t_up = radAngle + 0.05;
     float t_lo = radAngle - 0.05;
     QPolygonF newTriangle;
@@ -378,8 +365,6 @@ void MainWindow::updateDetectionPoint(float angle, float distance) {
     newTriangle.append(QPointF(505, 495));
     newTriangle.append(QPointF(445.0 * qCos(t_lo) + 505, -445.0 * qSin(t_lo) + 495));
     needle->setPolygon(newTriangle);
-
-    clearOldDetectionPoints();
 }
 
 void MainWindow::clearOldDetectionPoints() {
@@ -454,8 +439,8 @@ MainWindow::~MainWindow() {
     if (serial->isOpen()) {
         serial->close();
     }
-    if (batterySerial->isOpen()) {
-        batterySerial->close();
+    if (energySerial->isOpen()) {
+        energySerial->close();
     }
     delete ui;
 }
