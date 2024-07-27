@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -89,7 +90,7 @@ MainWindow::MainWindow(QWidget *parent)
     timeTimer->start(1000);  // Update every second
 
 
-    // Setup energy serial port
+    /* // Setup energy serial port
     energySerial->setPortName("COM9");
     energySerial->setBaudRate(QSerialPort::Baud115200);
     energySerial->setDataBits(QSerialPort::Data8);
@@ -104,7 +105,7 @@ MainWindow::MainWindow(QWidget *parent)
         qDebug() << "Failed to open Energy serial port.";
     }
 
-    energyTimer->start(2000);
+    energyTimer->start(2000); */
 }
 
 void MainWindow::readEnergyData() {
@@ -160,18 +161,9 @@ void MainWindow::processRadarData(const QString &data) {
             if (!laserActive) {
                 handleLaserActivation();
             }
-        } else if (distance > LASER_ACTIVATION_MAX_RANGE && distance <= MAX_DETECTION_RANGE) {
-            ui->detectionStatusLabel->setText("Object Detected");
-            ui->detectionStatusLabel->setStyleSheet("color: orange;");
-            if (laserActive) {
-                deactivateLaser();
-            }
         } else {
-            ui->detectionStatusLabel->setText("No Object");
-            ui->detectionStatusLabel->setStyleSheet("color: green;");
-            if (laserActive) {
-                deactivateLaser();
-            }
+            ui->detectionStatusLabel->setText(distance > LASER_ACTIVATION_MAX_RANGE && distance <= MAX_DETECTION_RANGE ? "Object Detected" : "No Object");
+            ui->detectionStatusLabel->setStyleSheet(distance > LASER_ACTIVATION_MAX_RANGE && distance <= MAX_DETECTION_RANGE ? "color: orange;" : "color: green;");
         }
     }
 }
@@ -274,10 +266,16 @@ void MainWindow::handleLaserStatus(const QString &status) {
         laserActive = true;
         updateLaserStatus("Laser: On");
         laserTimer->start(2000);
+        if (autoMode) {
+            autoTimer->stop();
+        }
     } else if (status == "LASER_DEACTIVATED") {
         laserActive = false;
         updateLaserStatus("Laser: Off");
         laserTimer->stop();
+        if (autoMode) {
+            autoTimer->start(50);
+        }
     }
 }
 
@@ -318,29 +316,32 @@ void MainWindow::updateServo(QString command) {
 }
 
 void MainWindow::updateServoAuto() {
-    static int angle = 0;
-    static bool increasing = true;
-    static const int stepSize = 2;
+    if (!laserActive) {
+        static int angle = 0;
+        static bool increasing = true;
+        static const int stepSize = 2;
 
-    if (increasing) {
-        angle += stepSize;
-        if (angle >= 180) {
-            angle = 180;
-            increasing = false;
+        if (increasing) {
+            angle += stepSize;
+            if (angle >= 180) {
+                angle = 180;
+                increasing = false;
+            }
+        } else {
+            angle -= stepSize;
+            if (angle <= 0) {
+                angle = 0;
+                increasing = true;
+            }
         }
-    } else {
-        angle -= stepSize;
-        if (angle <= 0) {
-            angle = 0;
-            increasing = true;
-        }
+
+        updateServo(QString::number(angle) + "\n");
+        ui->verticalSlider->setValue(angle);
     }
-
-    updateServo(QString::number(angle) + "\n");
-    ui->verticalSlider->setValue(angle);
 }
 
 void MainWindow::updateDetectionPoint(float angle, float distance) {
+    qDebug() << "Updating detection point at angle:" << angle << "distance:" << distance;
     if (distance > 0 && distance <= 200) {
         float radAngle = qDegreesToRadians(angle);
 
